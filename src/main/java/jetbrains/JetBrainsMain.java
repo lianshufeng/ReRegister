@@ -6,11 +6,19 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 public class JetBrainsMain {
 
     //支持的产品
-    private static final String[] productNames = new String[]{".WebStorm", ".IntelliJIdea"};
+//    private static final String[] productNames = new String[]{".WebStorm", ".IntelliJIdea"};
+
+
+    private static final ProductConfig[] products = new ProductConfig[]{
+            new ProductConfig(".WebStorm", "webstorm"),
+            new ProductConfig(".IntelliJIdea", "idea")
+    };
+
 
     //用户目录
     private final static String UserProFile = System.getenv("USERPROFILE");
@@ -40,7 +48,8 @@ public class JetBrainsMain {
     private static void scan(JPanel panel) {
         File file = new File(UserProFile);
         for (String fileName : file.list()) {
-            for (String productName : productNames) {
+            for (final ProductConfig product : products) {
+                String productName = product.getMatchName();
                 if (fileName.length() < productName.length()) {
                     continue;
                 }
@@ -51,7 +60,7 @@ public class JetBrainsMain {
                     if (targetFIle.exists() && targetFIle.list().length > 0) {
                         JButton button = new JButton();
                         button.setText(fileName);
-                        button.addActionListener(new ButtonClick(button, targetFIle));
+                        button.addActionListener(new ButtonClick(button, targetFIle, product));
                         panel.add(button);
                     }
                 }
@@ -68,16 +77,18 @@ public class JetBrainsMain {
 
         private JButton button;
         private File registerFile;
+        private ProductConfig product;
 
 
-        public ButtonClick(JButton button, File registerFile) {
+        public ButtonClick(JButton button, File registerFile, ProductConfig product) {
             this.button = button;
             this.registerFile = registerFile;
+            this.product = product;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            int option = JOptionPane.showConfirmDialog(null, "remove " + "["+button.getText()+"]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "remove " + "[" + button.getText() + "]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
 
                 //删除该目录下所有文件
@@ -85,12 +96,53 @@ public class JetBrainsMain {
                     file.deleteOnExit();
                 }
 
+                // 清空注册表
+                runCmd("reg delete \"HKEY_CURRENT_USER\\Software\\JavaSoft\\Prefs\\jetbrains\\" + product.getRegeditName() + "\" /f");
+
                 //隐藏当前按钮
                 button.setVisible(false);
 
             }
         }
+
+        static void runCmd(String cmd) {
+            try {
+                Runtime.getRuntime().exec("cmd /c " + cmd);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
+
+    static class ProductConfig {
+
+        /**
+         * 匹配名字
+         */
+        private String matchName;
+
+        /**
+         * 注册表名称
+         */
+        private String regeditName;
+
+
+        public String getMatchName() {
+            return matchName;
+        }
+
+        public String getRegeditName() {
+            return regeditName;
+        }
+
+        public ProductConfig() {
+        }
+
+        public ProductConfig(String matchName, String regeditName) {
+            this.matchName = matchName;
+            this.regeditName = regeditName;
+        }
+    }
 
 }
