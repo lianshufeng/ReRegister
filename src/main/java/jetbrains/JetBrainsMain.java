@@ -10,18 +10,15 @@ import java.io.IOException;
 
 public class JetBrainsMain {
 
-    //支持的产品
-//    private static final String[] productNames = new String[]{".WebStorm", ".IntelliJIdea"};
-
 
     private static final ProductConfig[] products = new ProductConfig[]{
-            new ProductConfig(".WebStorm", "webstorm"),
-            new ProductConfig(".IntelliJIdea", "idea")
+
+            new ProductConfig(System.getenv("USERPROFILE"), ".WebStorm", "config/eval", "webstorm"),
+            new ProductConfig(System.getenv("appdata") + "/JetBrains", "WebStorm", "eval", "webstorm"),
+
+            new ProductConfig(System.getenv("USERPROFILE"), ".IntelliJIdea", "config/eval", "idea"),
+            new ProductConfig(System.getenv("appdata") + "/JetBrains", "IntelliJIdea", "eval", "idea"),
     };
-
-
-    //用户目录
-    private final static String UserProFile = System.getenv("USERPROFILE");
 
 
     public static void main(String[] args) {
@@ -46,27 +43,33 @@ public class JetBrainsMain {
      * @param panel
      */
     private static void scan(JPanel panel) {
-        File file = new File(UserProFile);
-        for (String fileName : file.list()) {
-            for (final ProductConfig product : products) {
-                String productName = product.getMatchName();
-                if (fileName.length() < productName.length()) {
-                    continue;
-                }
-
-                //找到注册文件
-                if (fileName.substring(0, productName.length()).equals(productName)) {
-                    File targetFIle = new File(file.getAbsolutePath() + "/" + fileName + "/config/eval");
-                    if (targetFIle.exists() && targetFIle.list().length > 0) {
-                        JButton button = new JButton();
-                        button.setText(fileName);
-                        button.addActionListener(new ButtonClick(button, targetFIle, product));
-                        panel.add(button);
-                    }
-                }
-
-            }
+        for (ProductConfig product : products) {
+            loadProduct(product, panel);
         }
+
+
+    }
+
+    private static void loadProduct(ProductConfig product, JPanel panel) {
+        File file = new File(product.getPath());
+        for (String fileName : file.list()) {
+            String productName = product.getMatchNames();
+            if (fileName.length() < productName.length()) {
+                continue;
+            }
+            //找到注册文件
+            if (fileName.substring(0, productName.length()).equals(productName)) {
+                File targetFIle = new File(file.getAbsolutePath() + "/" + fileName + "/" + product.getProductFolder());
+                if (targetFIle.exists() && targetFIle.list().length > 0) {
+                    JButton button = new JButton();
+                    button.setText(fileName);
+                    button.addActionListener(new ButtonClick(button, targetFIle, product));
+                    panel.add(button);
+                }
+            }
+
+        }
+
     }
 
 
@@ -117,32 +120,50 @@ public class JetBrainsMain {
 
     static class ProductConfig {
 
+        /***
+         * 路径
+         */
+        private String path;
+
+
         /**
          * 匹配名字
          */
-        private String matchName;
+        private String matchNames;
+
+        /**
+         * 注册信息的目录
+         */
+        private String productFolder;
 
         /**
          * 注册表名称
          */
         private String regeditName;
 
+        public String getProductFolder() {
+            return productFolder;
+        }
 
-        public String getMatchName() {
-            return matchName;
+        public String getPath() {
+            return path;
+        }
+
+        public String getMatchNames() {
+            return matchNames;
         }
 
         public String getRegeditName() {
             return regeditName;
         }
 
-        public ProductConfig() {
-        }
-
-        public ProductConfig(String matchName, String regeditName) {
-            this.matchName = matchName;
+        public ProductConfig(String path, String matchNames, String productFolder, String regeditName) {
+            this.path = path;
+            this.matchNames = matchNames;
+            this.productFolder = productFolder;
             this.regeditName = regeditName;
         }
     }
+
 
 }
