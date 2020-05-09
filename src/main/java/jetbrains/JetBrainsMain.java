@@ -18,6 +18,10 @@ public class JetBrainsMain {
 
             new ProductConfig(System.getenv("USERPROFILE"), ".IntelliJIdea", "config/eval", "idea"),
             new ProductConfig(System.getenv("appdata") + "/JetBrains", "IntelliJIdea", "eval", "idea"),
+			
+			
+			new ProductConfig(System.getenv("appdata") + "/JetBrains", "PyCharm", "eval", "pycharm"),
+			
     };
 
 
