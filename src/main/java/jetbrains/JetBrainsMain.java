@@ -96,8 +96,14 @@ public class JetBrainsMain {
 
                 //删除该目录下所有文件
                 for (File file : registerFile.listFiles()) {
-                    file.deleteOnExit();
+                    file.delete();
                 }
+
+                // 删除 other.xml
+                new File(registerFile.getParent() + "/options/other.xml").delete();
+
+
+                runCmd("reg delete \"HKEY_CURRENT_USER\\Software\\JavaSoft\\Prefs\\jetbrains\" /va /f");
 
                 // 清空注册表
                 runCmd("reg delete \"HKEY_CURRENT_USER\\Software\\JavaSoft\\Prefs\\jetbrains\\" + product.getRegeditName() + "\" /f");
