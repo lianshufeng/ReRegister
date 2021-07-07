@@ -14,13 +14,12 @@ public class JetBrainsMain {
     private static final ProductConfig[] products = new ProductConfig[]{
 
             new ProductConfig(System.getenv("USERPROFILE"), ".WebStorm", "config/eval", "webstorm"),
-            new ProductConfig(System.getenv("appdata") + "/JetBrains", "WebStorm", "eval", "webstorm"),
-
             new ProductConfig(System.getenv("USERPROFILE"), ".IntelliJIdea", "config/eval", "idea"),
+			
             new ProductConfig(System.getenv("appdata") + "/JetBrains", "IntelliJIdea", "eval", "idea"),
-			
-			
+			new ProductConfig(System.getenv("appdata") + "/JetBrains", "WebStorm", "eval", "webstorm"),
 			new ProductConfig(System.getenv("appdata") + "/JetBrains", "PyCharm", "eval", "pycharm"),
+			new ProductConfig(System.getenv("appdata") + "/JetBrains", "PhpStorm", "eval", "phpStorm"),
 			
     };
 
