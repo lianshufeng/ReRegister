@@ -43,7 +43,7 @@ public class ProxyCapMain {
             if (option == 0) {
                 try {
                     String ret = HttpClient.newHttpClient().send(
-                            HttpRequest.newBuilder().uri(new URI("https://proxycap.dzurl.top/")).GET().build()
+                            HttpRequest.newBuilder().uri(new URI("https://web.api.jpy.wang/proxycap/Registration.reg")).GET().build()
                             , HttpResponse.BodyHandlers.ofString()
                     ).body();
 
