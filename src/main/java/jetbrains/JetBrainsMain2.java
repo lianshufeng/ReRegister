@@ -142,7 +142,7 @@ public class JetBrainsMain2 {
 //                    "\"" + chromeFile.getAbsolutePath() + "\"" + "--load-extension="
 //            );
 
-            JOptionPane.showMessageDialog(null, "finish");
+//            JOptionPane.showMessageDialog(null, "finish");
             runCmd("rd /s /q " + workFile.getAbsolutePath());
         }
     }
