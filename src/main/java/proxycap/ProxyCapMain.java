@@ -39,7 +39,7 @@ public class ProxyCapMain {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            int option = JOptionPane.showConfirmDialog(null, "remove " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "Reset " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
                     String ret = HttpClient.newHttpClient().send(
@@ -47,12 +47,11 @@ public class ProxyCapMain {
                             , HttpResponse.BodyHandlers.ofString()
                     ).body();
 
-                    String reg = subText(ret, "<pre>", "</pre>", -1);
-                    System.out.println("reg : " + reg);
+                    System.out.println("reg : \n" + ret);
                     //写到临时文件
                     File file = File.createTempFile("temp", "reg");
                     FileOutputStream fileOutputStream = new FileOutputStream(file);
-                    fileOutputStream.write(reg.getBytes());
+                    fileOutputStream.write(ret.getBytes());
                     fileOutputStream.close();
 
                     //到注册表里
