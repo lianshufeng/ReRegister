@@ -1,19 +1,23 @@
 @echo off
 
-:: build
-mkdir %tmp%\_proxycap
-cd /d %tmp%\_proxycap
+:: work
+echo ProxyCap ReRegister...
+cd /d %tmp%
 
 :: download
-curl https://web.api.jpy.wang/proxycap/Registration.reg -o Registration.reg
-type Registration.reg
+echo download... Registration.reg
+curl https://web.api.jpy.wang/proxycap/Registration.reg -o _Registration.reg
+type _Registration.reg
+
 
 :: load
 echo loading... Registration.reg
-regedit /s Registration.reg
-ping -n 3 127.0.0.1>nul
+regedit /s _Registration.reg
+ping -n 5 127.0.0.1>nul
 
 :: clean
-rd /s /q %tmp%\_proxycap
+del _Registration.reg
 
+echo finish...
+echo -----------------------------------------
 pause
