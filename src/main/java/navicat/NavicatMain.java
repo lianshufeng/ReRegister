@@ -58,6 +58,9 @@ public class NavicatMain {
                     // navicat 15
                     runCmd("reg delete \"HKEY_CURRENT_USER\\SOFTWARE\\PremiumSoft\\NavicatPremium\\Registration15XCS\" /f");
 
+                    // navicat 16
+                    runCmd("reg delete \"HKEY_CURRENT_USER\\SOFTWARE\\PremiumSoft\\NavicatPremium\\Registration16XCS\" /f");
+
                     JOptionPane.showMessageDialog(null, "finish");
                 } catch (Exception ex) {
                     ex.printStackTrace();
