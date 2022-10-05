@@ -113,7 +113,7 @@ public class ProxyCapMain {
 
 
     private static void repairInstall() {
-        JOptionPane.showMessageDialog(null, "请在确定后操作: \n [repair] - <Finish> - <continue> - <No>");
+        JOptionPane.showMessageDialog(null, "请在确定后操作: \n <Finish> - <continue> - <No>");
         runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath());
         JOptionPane.showMessageDialog(null, "请重启服务，并恢复配置文件: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
     }
