@@ -77,7 +77,10 @@ public class JrebelMain {
         System.out.println("clean .jrebel");
         File file = new File(System.getProperty("user.home") + "/.jrebel");
         if (file.exists()) {
-            Arrays.stream(file.listFiles()).filter(it -> it.canWrite()).forEach(it -> it.delete());
+            Arrays.stream(file.listFiles()).filter(it -> it.canWrite()).forEach(it -> {
+                System.out.println("delete : " + it.getAbsolutePath());
+                it.delete();
+            });
         }
 
 
