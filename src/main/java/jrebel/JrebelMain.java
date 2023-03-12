@@ -138,7 +138,7 @@ public class JrebelMain {
         jrebelPropertiesOutputStream.close();
 
 
-        JOptionPane.showMessageDialog(null, "please restart ide ,  license :  \n" + jrebelLicFile.getAbsolutePath());
+        JOptionPane.showMessageDialog(null, "please restart idea ,  license :  \n" + jrebelLicFile.getAbsolutePath());
 
     }
 
