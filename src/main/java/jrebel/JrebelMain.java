@@ -132,8 +132,8 @@ public class JrebelMain {
         //write jrebel.properties
         FileOutputStream jrebelPropertiesOutputStream = new FileOutputStream(jrebelHome.getAbsolutePath() + "/jrebel.properties");
         jrebelPropertiesOutputStream.write(("rebel.license=" + jrebelLicFile.getAbsolutePath() + "\r\n").getBytes());
-        jrebelPropertiesOutputStream.write(("rebel.preferred.license=0").getBytes());
-        jrebelPropertiesOutputStream.write(("rebel.properties.version=2").getBytes());
+        jrebelPropertiesOutputStream.write(("rebel.preferred.license=0\r\n").getBytes());
+        jrebelPropertiesOutputStream.write(("rebel.properties.version=2\r\n").getBytes());
         jrebelPropertiesOutputStream.flush();
         jrebelPropertiesOutputStream.close();
 
