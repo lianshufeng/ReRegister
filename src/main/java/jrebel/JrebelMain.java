@@ -74,21 +74,22 @@ public class JrebelMain {
     }
 
     private static void action() throws Exception {
-        System.out.println("clean .jrebel");
-        File file = new File(System.getProperty("user.home") + "/.jrebel");
-        if (file.exists()) {
-            Arrays.stream(file.listFiles()).filter(it -> it.canWrite()).forEach(it -> {
-                System.out.println("delete : " + it.getAbsolutePath());
-                it.delete();
-            });
-        }
+        final File jrebelHome = new File(System.getProperty("user.home") + "/.jrebel");
+        final String[] jrebelFiless = new String[]{
+                "jrebel.prefs",
+                "jrebel.prefs.lock",
+                "jrebel.properties"
+        };
+
+        // É¾³ý jrebel ÅäÖÃÎÄ¼þ
+        Arrays.stream(jrebelFiless).map(it -> new File(jrebelHome.getAbsolutePath() + "/" + it)).filter(it -> it.exists()).forEach(it -> it.delete());
 
 
+        //write license jrebel.lic
         StringBuffer phone = new StringBuffer();
         for (int i = 0; i < randNumber(6, 11); i++) {
             phone.append(randNumber(0, 9));
         }
-
         Map<String, Object> body = new HashMap<>() {{
             put("referer_url", "IDE");
             put("email", uuid() + "%40qq.com");
@@ -108,34 +109,36 @@ public class JrebelMain {
             put("os.name", "Windows+11");
         }};
 
-
-        System.out.println(body);
-
         String queryText = String.join("&", body.entrySet().stream().map(it -> it.getKey() + "=" + it.getValue()).toArray(String[]::new));
         final URI uri = URI.create(url + "?" + queryText);
-
-
         final HttpClient httpClient = HttpClient.newBuilder()
                 .build();
-
-
         final HttpRequest request = HttpRequest.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .GET()
                 .uri(uri)
                 .build();
-
         String ret = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
         String content = subText(ret, "content\":\"", "\"", 0);
         System.out.println(content);
         byte[] bin = Base64.getMimeDecoder().decode(content);
-        File jrebelFile = new File("c:/jrebel.lic");
-        FileOutputStream fileOutputStream = new FileOutputStream(jrebelFile);
-        fileOutputStream.write(bin);
-        fileOutputStream.flush();
-        fileOutputStream.close();
+        File jrebelLicFile = new File(jrebelHome.getAbsolutePath() + "/jrebel.lic");
+        FileOutputStream jrebelLicOutputStream = new FileOutputStream(jrebelLicFile);
+        jrebelLicOutputStream.write(bin);
+        jrebelLicOutputStream.flush();
+        jrebelLicOutputStream.close();
 
-        JOptionPane.showMessageDialog(null, "please use license :  \n" + jrebelFile.getAbsolutePath());
+
+        //write jrebel.properties
+        FileOutputStream jrebelPropertiesOutputStream = new FileOutputStream(jrebelHome.getAbsolutePath() + "/jrebel.properties");
+        jrebelPropertiesOutputStream.write(("rebel.license=" + jrebelLicFile.getAbsolutePath() + "\r\n").getBytes());
+        jrebelPropertiesOutputStream.write(("rebel.preferred.license=0").getBytes());
+        jrebelPropertiesOutputStream.write(("rebel.properties.version=2").getBytes());
+        jrebelPropertiesOutputStream.flush();
+        jrebelPropertiesOutputStream.close();
+
+
+        JOptionPane.showMessageDialog(null, "please restart ide ,  license :  \n" + jrebelLicFile.getAbsolutePath());
 
     }
 
