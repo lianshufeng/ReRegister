@@ -62,6 +62,22 @@ public class ProxyCapMain {
         panel.add(button2);
 
 
+
+
+        JButton button3 = new JButton();
+        button3.setText("停止 ProxyCap 服务");
+        button3.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                runCmd("net stop pcapsvc");
+                runCmd("taskkill /im pcapui.exe /f");
+                JOptionPane.showMessageDialog(null, "服务停止完成");
+            }
+        });
+        panel.add(button3);
+
+
         jf.setLayout(new BorderLayout());
         jf.add(panel, BorderLayout.CENTER);
 //        jf.setContentPane(panel);
