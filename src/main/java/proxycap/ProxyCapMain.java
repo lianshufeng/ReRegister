@@ -41,9 +41,9 @@ public class ProxyCapMain {
 
 
         JButton resetProxyCap = new JButton();
-        resetProxyCap.setText("重置 ProxyCap 注册");
+        resetProxyCap.setText("重置 ProxyCap 服务");
         resetProxyCap.addActionListener((e) -> {
-            int option = JOptionPane.showConfirmDialog(null, "Reset " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "重置 " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
                     //判断是否需要下载
@@ -67,9 +67,9 @@ public class ProxyCapMain {
 
 
         JButton uninstallProxyCap = new JButton();
-        uninstallProxyCap.setText("卸载 ProxyCap 注册");
+        uninstallProxyCap.setText("卸载 ProxyCap 服务");
         uninstallProxyCap.addActionListener((e) -> {
-            int option = JOptionPane.showConfirmDialog(null, "Reset " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "卸载 " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
                     //判断是否需要下载
