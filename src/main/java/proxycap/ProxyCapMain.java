@@ -98,8 +98,7 @@ public class ProxyCapMain {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                runCmd("net stop pcapsvc");
-                runCmd("taskkill /im pcapui.exe /f");
+                stopService();
                 JOptionPane.showMessageDialog(null, "服务停止完成");
             }
         });
@@ -112,8 +111,8 @@ public class ProxyCapMain {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                runCmd("net stop pcapsvc");
-                runCmd("taskkill /im pcapui.exe /f");
+                stopService();
+
                 runCmd("net start pcapsvc");
                 runCmd("powershell -Command \"$Key = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' ; $Name = 'ProxyCap' ; $result = (Get-ItemProperty -Path \"Registry::$Key\" -ErrorAction Stop).$Name; & $result\"");
                 JOptionPane.showMessageDialog(null, "服务重启完成");
@@ -175,15 +174,22 @@ public class ProxyCapMain {
 //    }
 //
 
+    private static void stopService() {
+        runCmd("net stop pcapsvc");
+        runCmd("taskkill /im pcapui.exe /f");
+    }
+
     /**
      * 卸载
      */
     private static void unInstall() {
-        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() + " /quiet /uninstall " + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")) + " /norestart");
+//        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() + " /quiet /uninstall " + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")) + " /norestart");
+        stopService();
+        runCmd("cmd /c " + "msiexec /quiet /uninstall " + PROXYCAP_INSTALL_URL + " /norestart");
     }
 
     private static void repairInstall() {
-        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() +" /quiet /norestart");
+        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() + " /quiet /norestart");
     }
 
 
