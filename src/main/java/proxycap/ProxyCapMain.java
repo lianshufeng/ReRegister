@@ -40,15 +40,75 @@ public class ProxyCapMain {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 100, 5));
 
 
-        JButton button = new JButton();
-        button.setText("重置 ProxyCap 注册");
-        button.addActionListener(new ButtonClick());
-        panel.add(button);
+        JButton resetProxyCap = new JButton();
+        resetProxyCap.setText("重置 ProxyCap 注册");
+        resetProxyCap.addActionListener((e) -> {
+            int option = JOptionPane.showConfirmDialog(null, "Reset " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            if (option == 0) {
+                try {
+                    //判断是否需要下载
+                    downloadProxyCap();
+
+                    //备份配置文件
+                    backupConfig();
+
+                    //清除注册信息
+                    resetRegInfo();
+
+                    //修复安装
+                    repairInstall();
+                    JOptionPane.showMessageDialog(null, "请启动服务，并恢复配置文件: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        panel.add(resetProxyCap);
 
 
-        JButton button2 = new JButton();
-        button2.setText("重启 ProxyCap 服务");
-        button2.addActionListener(new ActionListener() {
+        JButton uninstallProxyCap = new JButton();
+        uninstallProxyCap.setText("卸载 ProxyCap 注册");
+        uninstallProxyCap.addActionListener((e) -> {
+            int option = JOptionPane.showConfirmDialog(null, "Reset " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            if (option == 0) {
+                try {
+                    //判断是否需要下载
+                    downloadProxyCap();
+
+                    //备份配置文件
+                    backupConfig();
+
+                    //清除注册信息
+                    resetRegInfo();
+
+                    //卸载
+                    unInstall();
+                    JOptionPane.showMessageDialog(null, "卸载完成,复配置文件: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        panel.add(uninstallProxyCap);
+
+
+        JButton stopProxyCap = new JButton();
+        stopProxyCap.setText("停止 ProxyCap 服务");
+        stopProxyCap.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                runCmd("net stop pcapsvc");
+                runCmd("taskkill /im pcapui.exe /f");
+                JOptionPane.showMessageDialog(null, "服务停止完成");
+            }
+        });
+        panel.add(stopProxyCap);
+
+
+        JButton reStartProxyCap = new JButton();
+        reStartProxyCap.setText("重启 ProxyCap 服务");
+        reStartProxyCap.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -59,23 +119,7 @@ public class ProxyCapMain {
                 JOptionPane.showMessageDialog(null, "服务重启完成");
             }
         });
-        panel.add(button2);
-
-
-
-
-        JButton button3 = new JButton();
-        button3.setText("停止 ProxyCap 服务");
-        button3.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                runCmd("net stop pcapsvc");
-                runCmd("taskkill /im pcapui.exe /f");
-                JOptionPane.showMessageDialog(null, "服务停止完成");
-            }
-        });
-        panel.add(button3);
+        panel.add(reStartProxyCap);
 
 
         jf.setLayout(new BorderLayout());
@@ -103,7 +147,21 @@ public class ProxyCapMain {
             int option = JOptionPane.showConfirmDialog(null, "Reset " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
-                    work();
+                    //判断是否需要下载
+                    downloadProxyCap();
+
+                    //备份配置文件
+                    backupConfig();
+
+                    //清除注册信息
+                    resetRegInfo();
+
+                    //修复安装
+                    JOptionPane.showMessageDialog(null, "请在确定后操作: \n <Finish> - <continue> - <Close> - <No>");
+                    repairInstall();
+                    JOptionPane.showMessageDialog(null, "请重启服务，并恢复配置文件: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -111,27 +169,21 @@ public class ProxyCapMain {
         }
     }
 
-    private static void work() throws Exception {
 
-        //判断是否需要下载
-        downloadProxyCap();
+//    private static void install() {
+//        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() + " /quiet /uninstall " + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")) + " /norestart");
+//    }
+//
 
-        //备份配置文件
-        backupConfig();
-
-        //清除注册信息
-        resetRegInfo();
-
-        //修复安装
-        repairInstall();
-
+    /**
+     * 卸载
+     */
+    private static void unInstall() {
+        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() + " /quiet /uninstall " + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")) + " /norestart");
     }
 
-
     private static void repairInstall() {
-        JOptionPane.showMessageDialog(null, "请在确定后操作: \n <Finish> - <continue> - <Close> - <No>");
-        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath());
-        JOptionPane.showMessageDialog(null, "请重启服务，并恢复配置文件: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() +" /quiet /norestart");
     }
 
 
