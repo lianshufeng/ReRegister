@@ -138,35 +138,6 @@ public class ProxyCapMain {
     }
 
 
-    static class ButtonClick implements ActionListener {
-
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            int option = JOptionPane.showConfirmDialog(null, "Reset " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
-            if (option == 0) {
-                try {
-                    //判断是否需要下载
-                    downloadProxyCap();
-
-                    //备份配置文件
-                    backupConfig();
-
-                    //清除注册信息
-                    resetRegInfo();
-
-                    //修复安装
-                    JOptionPane.showMessageDialog(null, "请在确定后操作: \n <Finish> - <continue> - <Close> - <No>");
-                    repairInstall();
-                    JOptionPane.showMessageDialog(null, "请重启服务，并恢复配置文件: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
-
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-    }
 
 
 //    private static void install() {
