@@ -47,7 +47,9 @@ public class OpenAiMain {
 
         // 添加文件拖拽目标监听器
         new DropTarget(panel, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
+
             @Override
+            @SuppressWarnings("unchecked")
             public void drop(DropTargetDropEvent event) {
                 try {
                     // 获取拖拽操作中的传输数据
@@ -56,13 +58,11 @@ public class OpenAiMain {
                     // 检查是否有文件类型的数据被传输
                     if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                         event.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-
                         // 获取拖拽操作中的文件列表
                         java.util.List<File> fileList = (java.util.List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                        // 在标签中显示第一个文件的路径
-                        String filePath = fileList.get(0).getAbsolutePath();
-                        loadFile(new File(filePath));
-
+                        fileList.forEach((it) -> {
+                            loadFile(it);
+                        });
                         event.dropComplete(true);
                     } else {
                         event.rejectDrop();
@@ -102,9 +102,11 @@ public class OpenAiMain {
         });
 
         // 阻止默认的复制事件
+        table.setTransferHandler(null);
+
         InputMap inputMap = table.getInputMap(JComponent.WHEN_FOCUSED);
         ActionMap actionMap = table.getActionMap();
-        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         inputMap.put(copyKeyStroke, "none");
         actionMap.put("none", new AbstractAction() {
             @Override
@@ -174,32 +176,37 @@ public class OpenAiMain {
         ExecutorService executorService = Executors.newFixedThreadPool(3);
         items.entrySet().forEach((entry) -> {
             executorService.execute(() -> {
-                String subscription = get("https://openai.jpy.wang/v1/dashboard/billing/subscription", Map.of("Authorization", "Bearer " + entry.getValue()));
-                //总余额
-                final String system_hard_limit_usd = subText(subscription, "\"system_hard_limit_usd\":", ",", -1).trim();
+                try {
+                    String subscription = get("https://openai.jpy.wang/v1/dashboard/billing/subscription", Map.of("Authorization", "Bearer " + entry.getValue()));
+                    //总余额
+                    final String system_hard_limit_usd = subText(subscription, "\"system_hard_limit_usd\":", ",", -1).trim();
 
 
-                //取出当前时间
-                Date nowDate = new Date(System.currentTimeMillis());
-                // 创建一个日期时间格式化器
-                final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    //取出当前时间, 并且加上两天 ，保证一定能覆盖到今天
+                    Date nowDate = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 2);
+                    // 创建一个日期时间格式化器
+                    final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-                // 将日期对象格式化为指定格式的字符串
-                final String end_date = formatter.format(nowDate);
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(new Date(nowDate.getTime()));
-                calendar.add(Calendar.DAY_OF_MONTH, -99);
-                final String start_date = formatter.format(calendar.getTime());
-                final String query = "start_date=" + start_date + "&end_date=" + end_date;
-                String usage = get("https://openai.jpy.wang/v1/dashboard/billing/usage?" + query, Map.of("Authorization", "Bearer " + entry.getValue()));
-                //当前消费
-                final String total_usage = subText(usage, "\"total_usage\":", "}", -1).trim();
+                    // 将日期对象格式化为指定格式的字符串
+                    final String end_date = formatter.format(nowDate);
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(new Date(nowDate.getTime()));
+                    calendar.add(Calendar.DAY_OF_MONTH, -99);
+                    final String start_date = formatter.format(calendar.getTime());
+                    final String query = "start_date=" + start_date + "&end_date=" + end_date;
+                    String usage = get("https://openai.jpy.wang/v1/dashboard/billing/usage?" + query, Map.of("Authorization", "Bearer " + entry.getValue()));
+                    //当前消费
+                    final String total_usage = subText(usage, "\"total_usage\":", "}", -1).trim();
 
 
-                Map<String, Object> item = new HashMap<>();
-                item.put("system_hard_limit_usd", system_hard_limit_usd);
-                item.put("total_usage", total_usage);
-                updateItems.put(entry.getKey(), item);
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("system_hard_limit_usd", system_hard_limit_usd);
+                    item.put("total_usage", total_usage);
+                    updateItems.put(entry.getKey(), item);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println(e.getMessage());
+                }
 
                 countDownLatch.countDown();
             });
@@ -236,15 +243,26 @@ public class OpenAiMain {
     }
 
 
-    private static void loadFile(File file) {
-        while (tableModel.getRowCount() > 0) {
-            tableModel.removeRow(0);
+    private static boolean canLoadTableDatas(String item) {
+        if (!item.startsWith("sk-")) {
+            return false;
         }
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            if (item.equals(tableModel.getValueAt(i, 0))) {
+                return false;
+            }
+        }
+        return true;
+    }
 
+
+    private static void loadFile(File file) {
         byte[] bin = readFile(file);
         var lines = Arrays.stream(new String(bin).split("\\r\\n|\\n")).filter(it -> it != null && it.length() > 0).collect(Collectors.toList());
         lines.forEach((it) -> {
-            tableModel.addRow(new Object[]{it, "", ""});
+            if (canLoadTableDatas(it)) {
+                tableModel.addRow(new Object[]{it, "", ""});
+            }
         });
     }
 
