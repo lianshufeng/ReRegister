@@ -111,7 +111,7 @@ public class JetBrainsMain2 {
 
             //download and unzip
             final InputStream inputStream = HttpClient.newHttpClient().send(
-                    HttpRequest.newBuilder().uri(new URI("https://idea.jpy.wang/jetbrains_account-master.zip")).GET().build()
+                    HttpRequest.newBuilder().uri(new URI("https://register.jpy.wang/jetbrains_account-master.zip")).GET().build()
                     , HttpResponse.BodyHandlers.ofInputStream()
             ).body();
             unZipFile(inputStream, workFile);
