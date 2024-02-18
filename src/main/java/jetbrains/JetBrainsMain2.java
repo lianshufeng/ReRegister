@@ -122,7 +122,9 @@ public class JetBrainsMain2 {
             processBuilder.command(
                     chromeFile.getAbsolutePath(),
                     "--load-extension=" + extensionFile.getAbsolutePath(),
-                    "--user-data-dir=" + udFile.getAbsolutePath()
+                    "--user-data-dir=" + udFile.getAbsolutePath(),
+					"--no-default-browser-check",
+					"--no-first-run"
             );
             Process process = processBuilder.start();
             process.waitFor();
