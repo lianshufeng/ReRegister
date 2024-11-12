@@ -3,9 +3,10 @@ set dn=Info
 set dn2=ShellFolder
 set rp=HKEY_CURRENT_USER\Software\Classes\CLSID
 :: reg delete HKEY_CURRENT_USER\Software\PremiumSoft\NavicatPremium\Registration14XCS /f  %’Î∂‘<strong><font color="#FF0000">navicat</font></strong>15%
-reg delete HKEY_CURRENT_USER\Software\PremiumSoft\NavicatPremium\Registration14XCS /f
-reg delete HKEY_CURRENT_USER\Software\PremiumSoft\NavicatPremium\Registration15XCS /f
-reg delete HKEY_CURRENT_USER\Software\PremiumSoft\NavicatPremium\Registration16XCS /f
+REM reg delete HKEY_CURRENT_USER\Software\PremiumSoft\NavicatPremium\Registration16XCS /f
+
+for /f "tokens=*" %%A in ('reg query "HKEY_CURRENT_USER\Software\PremiumSoft\NavicatPremium" /s /f "Registration" 2^>nul ^| findstr /i /r "Registration.*XCS$"') do ( reg delete "%%A" /f )
+
 reg delete HKEY_CURRENT_USER\Software\PremiumSoft\NavicatPremium\Update /f
 echo finding.....
 for /f "tokens=*" %%a in ('reg query "%rp%"') do (
