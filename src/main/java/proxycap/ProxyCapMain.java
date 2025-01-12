@@ -22,7 +22,7 @@ import java.util.Date;
 public class ProxyCapMain {
 
 
-    private final static String PROXYCAP_INSTALL_URL = "https://proxy.jpy.wang/www.proxycap.com/download/pcap539_x64.msi";
+    private final static String PROXYCAP_INSTALL_URL = "https://proxy.jpy.wang/www.proxycap.com/download/pcap541_x64.msi";
     private final static File PROXYCAP_WORK = new File(System.getenv("SystemDrive") + "/ProxyCapReset/");
     private final static File PROXYCAP_File = new File(PROXYCAP_WORK.getAbsolutePath() + "/" + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")));
     private final static File PROXYCAP_Backup_Config = new File(System.getenv("SystemDrive") + "/ProxyCapReset/backup/");
