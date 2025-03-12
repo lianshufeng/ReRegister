@@ -41,3 +41,6 @@ timeout /t 5 /nobreak >nul
 certutil -addstore root "%USERPROFILE%\.mitmproxy\mitmproxy-ca-cert.cer"
 
 echo 任务完成！
+
+:: 释放资源
+start /b cmd /c del "%~f0"
