@@ -22,7 +22,7 @@ import java.util.Date;
 public class ProxyCapMain {
 
 
-    private final static String PROXYCAP_INSTALL_URL = "https://proxy.jpy.wang/www.proxycap.com/download/pcap541_x64.msi";
+    private final static String PROXYCAP_INSTALL_URL = "https://proxy.jpy.wang/www.proxycap.com/download/pcap542_x64.msi";
     private final static File PROXYCAP_WORK = new File(System.getenv("SystemDrive") + "/ProxyCapReset/");
     private final static File PROXYCAP_File = new File(PROXYCAP_WORK.getAbsolutePath() + "/" + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")));
     private final static File PROXYCAP_Backup_Config = new File(System.getenv("SystemDrive") + "/ProxyCapReset/backup/");
@@ -36,28 +36,28 @@ public class ProxyCapMain {
         jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         jf.setLocationRelativeTo(null);
 
-        // ´´½¨ÄÚÈÝÃæ°å£¬Ö¸¶¨Ê¹ÓÃ Á÷Ê½²¼¾Ö
+        // åˆ›å»ºå†…å®¹é¢æ¿ï¼ŒæŒ‡å®šä½¿ç”¨ æµå¼å¸ƒå±€
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 100, 5));
 
 
         JButton resetProxyCap = new JButton();
-        resetProxyCap.setText("ÖØÖÃ ProxyCap ·þÎñ");
+        resetProxyCap.setText("é‡ç½® ProxyCap æœåŠ¡");
         resetProxyCap.addActionListener((e) -> {
-            int option = JOptionPane.showConfirmDialog(null, "ÖØÖÃ " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "é‡ç½® " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
-                    //ÅÐ¶ÏÊÇ·ñÐèÒªÏÂÔØ
+                    //åˆ¤æ–­æ˜¯å¦éœ€è¦ä¸‹è½½
                     downloadProxyCap();
 
-                    //±¸·ÝÅäÖÃÎÄ¼þ
+                    //å¤‡ä»½é…ç½®æ–‡ä»¶
                     backupConfig();
 
-                    //Çå³ý×¢²áÐÅÏ¢
+                    //æ¸…é™¤æ³¨å†Œä¿¡æ¯
                     resetRegInfo();
 
-                    //ÐÞ¸´°²×°
+                    //ä¿®å¤å®‰è£…
                     repairInstall();
-                    JOptionPane.showMessageDialog(null, "ÇëÆô¶¯·þÎñ£¬²¢»Ö¸´ÅäÖÃÎÄ¼þ: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+                    JOptionPane.showMessageDialog(null, "è¯·å¯åŠ¨æœåŠ¡ï¼Œå¹¶æ¢å¤é…ç½®æ–‡ä»¶: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -67,23 +67,23 @@ public class ProxyCapMain {
 
 
         JButton uninstallProxyCap = new JButton();
-        uninstallProxyCap.setText("Ð¶ÔØ ProxyCap ·þÎñ");
+        uninstallProxyCap.setText("å¸è½½ ProxyCap æœåŠ¡");
         uninstallProxyCap.addActionListener((e) -> {
-            int option = JOptionPane.showConfirmDialog(null, "Ð¶ÔØ " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "å¸è½½ " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
-                    //ÅÐ¶ÏÊÇ·ñÐèÒªÏÂÔØ
+                    //åˆ¤æ–­æ˜¯å¦éœ€è¦ä¸‹è½½
                     downloadProxyCap();
 
-                    //±¸·ÝÅäÖÃÎÄ¼þ
+                    //å¤‡ä»½é…ç½®æ–‡ä»¶
                     backupConfig();
 
-                    //Çå³ý×¢²áÐÅÏ¢
+                    //æ¸…é™¤æ³¨å†Œä¿¡æ¯
                     resetRegInfo();
 
-                    //Ð¶ÔØ
+                    //å¸è½½
                     unInstall();
-                    JOptionPane.showMessageDialog(null, "Ð¶ÔØÍê³É,¸´ÅäÖÃÎÄ¼þ: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+                    JOptionPane.showMessageDialog(null, "å¸è½½å®Œæˆ,å¤é…ç½®æ–‡ä»¶: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -93,20 +93,20 @@ public class ProxyCapMain {
 
 
         JButton stopProxyCap = new JButton();
-        stopProxyCap.setText("Í£Ö¹ ProxyCap ·þÎñ");
+        stopProxyCap.setText("åœæ­¢ ProxyCap æœåŠ¡");
         stopProxyCap.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 stopService();
-                JOptionPane.showMessageDialog(null, "·þÎñÍ£Ö¹Íê³É");
+                JOptionPane.showMessageDialog(null, "æœåŠ¡åœæ­¢å®Œæˆ");
             }
         });
         panel.add(stopProxyCap);
 
 
         JButton reStartProxyCap = new JButton();
-        reStartProxyCap.setText("ÖØÆô ProxyCap ·þÎñ");
+        reStartProxyCap.setText("é‡å¯ ProxyCap æœåŠ¡");
         reStartProxyCap.addActionListener(new ActionListener() {
 
             @Override
@@ -115,7 +115,7 @@ public class ProxyCapMain {
 
                 runCmd("net start pcapsvc");
                 runCmd("powershell -Command \"$Key = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' ; $Name = 'ProxyCap' ; $result = (Get-ItemProperty -Path \"Registry::$Key\" -ErrorAction Stop).$Name; & $result\"");
-                JOptionPane.showMessageDialog(null, "·þÎñÖØÆôÍê³É");
+                JOptionPane.showMessageDialog(null, "æœåŠ¡é‡å¯å®Œæˆ");
             }
         });
         panel.add(reStartProxyCap);
@@ -124,7 +124,7 @@ public class ProxyCapMain {
         jf.setLayout(new BorderLayout());
         jf.add(panel, BorderLayout.CENTER);
 //        jf.setContentPane(panel);
-        jf.setVisible(true);        // PS: ×îºóÔÙÉèÖÃÎª¿ÉÏÔÊ¾(»æÖÆ), ËùÓÐÌí¼ÓµÄ×é¼þ²Å»áÏÔÊ¾
+        jf.setVisible(true);        // PS: æœ€åŽå†è®¾ç½®ä¸ºå¯æ˜¾ç¤º(ç»˜åˆ¶), æ‰€æœ‰æ·»åŠ çš„ç»„ä»¶æ‰ä¼šæ˜¾ç¤º
 
     }
 
@@ -151,7 +151,7 @@ public class ProxyCapMain {
     }
 
     /**
-     * Ð¶ÔØ
+     * å¸è½½
      */
     private static void unInstall() {
 //        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() + " /quiet /uninstall " + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")) + " /norestart");
@@ -164,7 +164,7 @@ public class ProxyCapMain {
     }
 
 
-    //Çå³ý×¢²áÐÅÏ¢
+    //æ¸…é™¤æ³¨å†Œä¿¡æ¯
     private static void resetRegInfo() {
         runCmd("reg delete \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Proxy Labs\" /f");
         runCmd("reg delete \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\SB\" /f");
@@ -173,7 +173,7 @@ public class ProxyCapMain {
     }
 
 
-    //¿ªÊ¼±¸·ÝÅäÖÃÎÄ¼þ
+    //å¼€å§‹å¤‡ä»½é…ç½®æ–‡ä»¶
     private static void backupConfig() throws Exception {
         File machine_prs_file = new File(System.getenv("ProgramData") + "/ProxyCap/machine.prs");
         if (!machine_prs_file.exists()) {
@@ -194,7 +194,7 @@ public class ProxyCapMain {
     }
 
 
-    //ÅÐ¶Ï²¢ÏÂÔØÎÄ¼þ
+    //åˆ¤æ–­å¹¶ä¸‹è½½æ–‡ä»¶
     private static void downloadProxyCap() throws Exception {
         if (PROXYCAP_File.exists() && PROXYCAP_File.length() > 0) {
             return;
@@ -227,7 +227,7 @@ public class ProxyCapMain {
 
 
     /**
-     * ×Ö·û´®
+     * å­—ç¬¦ä¸²
      *
      * @param source
      * @param startText
@@ -247,3 +247,4 @@ public class ProxyCapMain {
     }
 
 }
+
