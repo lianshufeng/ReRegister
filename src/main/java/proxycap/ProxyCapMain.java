@@ -36,28 +36,28 @@ public class ProxyCapMain {
         jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         jf.setLocationRelativeTo(null);
 
-        // åˆ›å»ºå†…å®¹é¢æ¿ï¼ŒæŒ‡å®šä½¿ç”¨ æµå¼å¸ƒå±€
+        // ´´½¨ÄÚÈÝÃæ°å£¬Ö¸¶¨Ê¹ÓÃ Á÷Ê½²¼¾Ö
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 100, 5));
 
 
         JButton resetProxyCap = new JButton();
-        resetProxyCap.setText("é‡ç½® ProxyCap æœåŠ¡");
+        resetProxyCap.setText("ÖØÖÃ ProxyCap ·þÎñ");
         resetProxyCap.addActionListener((e) -> {
-            int option = JOptionPane.showConfirmDialog(null, "é‡ç½® " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "ÖØÖÃ " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
-                    //åˆ¤æ–­æ˜¯å¦éœ€è¦ä¸‹è½½
+                    //ÅÐ¶ÏÊÇ·ñÐèÒªÏÂÔØ
                     downloadProxyCap();
 
-                    //å¤‡ä»½é…ç½®æ–‡ä»¶
+                    //±¸·ÝÅäÖÃÎÄ¼þ
                     backupConfig();
 
-                    //æ¸…é™¤æ³¨å†Œä¿¡æ¯
+                    //Çå³ý×¢²áÐÅÏ¢
                     resetRegInfo();
 
-                    //ä¿®å¤å®‰è£…
+                    //ÐÞ¸´°²×°
                     repairInstall();
-                    JOptionPane.showMessageDialog(null, "è¯·å¯åŠ¨æœåŠ¡ï¼Œå¹¶æ¢å¤é…ç½®æ–‡ä»¶: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+                    JOptionPane.showMessageDialog(null, "ÇëÆô¶¯·þÎñ£¬²¢»Ö¸´ÅäÖÃÎÄ¼þ: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -67,23 +67,23 @@ public class ProxyCapMain {
 
 
         JButton uninstallProxyCap = new JButton();
-        uninstallProxyCap.setText("å¸è½½ ProxyCap æœåŠ¡");
+        uninstallProxyCap.setText("Ð¶ÔØ ProxyCap ·þÎñ");
         uninstallProxyCap.addActionListener((e) -> {
-            int option = JOptionPane.showConfirmDialog(null, "å¸è½½ " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, "Ð¶ÔØ " + "[ProxyCap]" + " ? ", "ReRegister", JOptionPane.YES_NO_OPTION);
             if (option == 0) {
                 try {
-                    //åˆ¤æ–­æ˜¯å¦éœ€è¦ä¸‹è½½
+                    //ÅÐ¶ÏÊÇ·ñÐèÒªÏÂÔØ
                     downloadProxyCap();
 
-                    //å¤‡ä»½é…ç½®æ–‡ä»¶
+                    //±¸·ÝÅäÖÃÎÄ¼þ
                     backupConfig();
 
-                    //æ¸…é™¤æ³¨å†Œä¿¡æ¯
+                    //Çå³ý×¢²áÐÅÏ¢
                     resetRegInfo();
 
-                    //å¸è½½
+                    //Ð¶ÔØ
                     unInstall();
-                    JOptionPane.showMessageDialog(null, "å¸è½½å®Œæˆ,å¤é…ç½®æ–‡ä»¶: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
+                    JOptionPane.showMessageDialog(null, "Ð¶ÔØÍê³É,¸´ÅäÖÃÎÄ¼þ: \n" + PROXYCAP_Backup_Config.getAbsolutePath());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -93,20 +93,20 @@ public class ProxyCapMain {
 
 
         JButton stopProxyCap = new JButton();
-        stopProxyCap.setText("åœæ­¢ ProxyCap æœåŠ¡");
+        stopProxyCap.setText("Í£Ö¹ ProxyCap ·þÎñ");
         stopProxyCap.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 stopService();
-                JOptionPane.showMessageDialog(null, "æœåŠ¡åœæ­¢å®Œæˆ");
+                JOptionPane.showMessageDialog(null, "·þÎñÍ£Ö¹Íê³É");
             }
         });
         panel.add(stopProxyCap);
 
 
         JButton reStartProxyCap = new JButton();
-        reStartProxyCap.setText("é‡å¯ ProxyCap æœåŠ¡");
+        reStartProxyCap.setText("ÖØÆô ProxyCap ·þÎñ");
         reStartProxyCap.addActionListener(new ActionListener() {
 
             @Override
@@ -115,7 +115,7 @@ public class ProxyCapMain {
 
                 runCmd("net start pcapsvc");
                 runCmd("powershell -Command \"$Key = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' ; $Name = 'ProxyCap' ; $result = (Get-ItemProperty -Path \"Registry::$Key\" -ErrorAction Stop).$Name; & $result\"");
-                JOptionPane.showMessageDialog(null, "æœåŠ¡é‡å¯å®Œæˆ");
+                JOptionPane.showMessageDialog(null, "·þÎñÖØÆôÍê³É");
             }
         });
         panel.add(reStartProxyCap);
@@ -124,7 +124,7 @@ public class ProxyCapMain {
         jf.setLayout(new BorderLayout());
         jf.add(panel, BorderLayout.CENTER);
 //        jf.setContentPane(panel);
-        jf.setVisible(true);        // PS: æœ€åŽå†è®¾ç½®ä¸ºå¯æ˜¾ç¤º(ç»˜åˆ¶), æ‰€æœ‰æ·»åŠ çš„ç»„ä»¶æ‰ä¼šæ˜¾ç¤º
+        jf.setVisible(true);        // PS: ×îºóÔÙÉèÖÃÎª¿ÉÏÔÊ¾(»æÖÆ), ËùÓÐÌí¼ÓµÄ×é¼þ²Å»áÏÔÊ¾
 
     }
 
@@ -151,7 +151,7 @@ public class ProxyCapMain {
     }
 
     /**
-     * å¸è½½
+     * Ð¶ÔØ
      */
     private static void unInstall() {
 //        runCmd("cmd /c " + PROXYCAP_File.getAbsolutePath() + " /quiet /uninstall " + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")) + " /norestart");
@@ -164,7 +164,7 @@ public class ProxyCapMain {
     }
 
 
-    //æ¸…é™¤æ³¨å†Œä¿¡æ¯
+    //Çå³ý×¢²áÐÅÏ¢
     private static void resetRegInfo() {
         runCmd("reg delete \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Proxy Labs\" /f");
         runCmd("reg delete \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\SB\" /f");
@@ -173,7 +173,7 @@ public class ProxyCapMain {
     }
 
 
-    //å¼€å§‹å¤‡ä»½é…ç½®æ–‡ä»¶
+    //¿ªÊ¼±¸·ÝÅäÖÃÎÄ¼þ
     private static void backupConfig() throws Exception {
         File machine_prs_file = new File(System.getenv("ProgramData") + "/ProxyCap/machine.prs");
         if (!machine_prs_file.exists()) {
@@ -194,7 +194,7 @@ public class ProxyCapMain {
     }
 
 
-    //åˆ¤æ–­å¹¶ä¸‹è½½æ–‡ä»¶
+    //ÅÐ¶Ï²¢ÏÂÔØÎÄ¼þ
     private static void downloadProxyCap() throws Exception {
         if (PROXYCAP_File.exists() && PROXYCAP_File.length() > 0) {
             return;
@@ -227,7 +227,7 @@ public class ProxyCapMain {
 
 
     /**
-     * å­—ç¬¦ä¸²
+     * ×Ö·û´®
      *
      * @param source
      * @param startText
