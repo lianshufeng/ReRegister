@@ -21,23 +21,23 @@ public class ProxyCapMain {
     private static final File PROXYCAP_FILE = new File(PROXYCAP_WORK.getAbsolutePath() + "/" + PROXYCAP_INSTALL_URL.substring(PROXYCAP_INSTALL_URL.lastIndexOf("/")));
     private static final File PROXYCAP_BACKUP_CONFIG = new File(System.getenv("SystemDrive") + "/ProxyCapReset/backup/");
 
-    // 所有中文常量改成 Unicode 转义，避免源文件编码差异导致的乱码
+    // 中文用 Unicode 转义，避免源文件编码差异导致乱码
     private static final String TXT_RESET_SERVICE       = "\u91cd\u7f6e ProxyCap \u670d\u52a1";                 // 重置 ProxyCap 服务
     private static final String TXT_UNINSTALL_SERVICE   = "\u5378\u8f7d ProxyCap \u670d\u52a1";                 // 卸载 ProxyCap 服务
     private static final String TXT_STOP_SERVICE        = "\u505c\u6b62 ProxyCap \u670d\u52a1";                 // 停止 ProxyCap 服务
     private static final String TXT_RESTART_SERVICE     = "\u91cd\u542f ProxyCap \u670d\u52a1";                 // 重启 ProxyCap 服务
 
-    private static final String MSG_CONFIRM_RESET       = "\u91cd\u7f6e " + "[ProxyCap]" + "  ? ";              // 重置 [ProxyCap]  ?
-    private static final String MSG_CONFIRM_UNINSTALL   = "\u5378\u8f7d " + "[ProxyCap]" + "  ? ";              // 卸载 [ProxyCap]  ?
+    private static final String MSG_CONFIRM_RESET       = "\u91cd\u7f6e " + "[ProxyCap]" + "  ? ";
+    private static final String MSG_CONFIRM_UNINSTALL   = "\u5378\u8f7d " + "[ProxyCap]" + "  ? ";
     private static final String MSG_STOP_DONE           = "\u670d\u52a1\u505c\u6b62\u5b8c\u6210";               // 服务停止完成
     private static final String MSG_RESTART_DONE        = "\u670d\u52a1\u91cd\u542f\u5b8c\u6210";               // 服务重启完成
-    private static final String MSG_AFTER_REPAIR        = "\u8bf7\u542f\u52a8\u670d\u52a1\uff0c\u5e76\u6062\u590d\u914d\u7f6e\u6587\u4ef6: \n"; // 请启动服务，并恢复配置文件:
-    private static final String MSG_AFTER_UNINSTALL     = "\u5378\u8f7d\u5b8c\u6210,\u6062\u590d\u914d\u7f6e\u6587\u4ef6: \n";                   // 卸载完成,恢复配置文件:
+    private static final String MSG_AFTER_REPAIR        = "\u8bf7\u542f\u52a8\u670d\u52a1\uff0c\u5e76\u6062\u590d\u914d\u7f6e\u6587\u4ef6: \n";
+    private static final String MSG_AFTER_UNINSTALL     = "\u5378\u8f7d\u5b8c\u6210,\u6062\u590d\u914d\u7f6e\u6587\u4ef6: \n";
 
     public static void main(String[] args) {
         initFile();
 
-        // 可选：设置一个常见中文字体，确保不同 LAF 下也能显示中文
+        // 可选：统一字体，防止某些 LAF 下中文回退异常
         UIManager.put("Button.font", new Font("Microsoft YaHei", Font.PLAIN, 12));
         UIManager.put("Label.font",  new Font("Microsoft YaHei", Font.PLAIN, 12));
 
@@ -95,8 +95,18 @@ public class ProxyCapMain {
             JButton reStartProxyCap = new JButton(TXT_RESTART_SERVICE);
             reStartProxyCap.addActionListener((ActionEvent e) -> {
                 stopService();
+
+                // 1) 同步启动服务（很快结束）
                 runCmd("net start pcapsvc");
-                runCmd("powershell -Command \"$Key = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' ; $Name = 'ProxyCap' ; $result = (Get-ItemProperty -Path \\\"Registry::$Key\\\" -ErrorAction Stop).$Name; & $result\"");
+
+                // 2) 异步启动托盘/GUI进程，立即返回，不阻塞事件线程
+                String ps = "powershell -NoProfile -WindowStyle Hidden -Command "
+                        + "\"$Key='HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run'; "
+                        + "$Name='ProxyCap'; "
+                        + "$exe=(Get-ItemProperty -Path \\\"Registry::$Key\\\" -ErrorAction Stop).$Name; "
+                        + "Start-Process -FilePath $exe\"";
+                runCmdAsync(ps);
+
                 JOptionPane.showMessageDialog(null, MSG_RESTART_DONE);
             });
             panel.add(reStartProxyCap);
@@ -121,19 +131,18 @@ public class ProxyCapMain {
         runCmd("taskkill /im pcapui.exe /f");
     }
 
-    /**
-     * 卸载
-     */
+    /** 卸载 */
     private static void unInstall() {
         stopService();
         runCmd("msiexec /quiet /uninstall " + PROXYCAP_INSTALL_URL + " /norestart");
     }
 
     private static void repairInstall() {
+        // 给路径加引号，以防含空格
         runCmd('"' + PROXYCAP_FILE.getAbsolutePath() + '"' + " /quiet /norestart");
     }
 
-    // 清除注册信息
+    /** 清除注册信息 */
     private static void resetRegInfo() {
         runCmd("reg delete \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Proxy Labs\" /f");
         runCmd("reg delete \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\SB\" /f");
@@ -141,7 +150,7 @@ public class ProxyCapMain {
         runCmd("reg delete \"HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\Tcpip\\Parameters\\Arp\" /f");
     }
 
-    // 备份配置文件
+    /** 备份配置文件 */
     private static void backupConfig() {
         File machinePrs = new File(System.getenv("ProgramData") + "/ProxyCap/machine.prs");
         if (!machinePrs.exists()) {
@@ -162,7 +171,7 @@ public class ProxyCapMain {
         }
     }
 
-    // 判断并下载安装包
+    /** 判断并下载安装包 */
     private static void downloadProxyCap() throws Exception {
         if (PROXYCAP_FILE.exists() && PROXYCAP_FILE.length() > 0) {
             return;
@@ -183,8 +192,7 @@ public class ProxyCapMain {
     }
 
     /**
-     * 运行命令（JDK11/21 通用，无需改启动参数）
-     * 传入一整行 Windows 命令，本方法内部用 "cmd /c" 执行。
+     * 同步运行命令（等待结束，打印输出），JDK 11/21 通用
      */
     static int runCmd(String cmdLine) {
         try {
@@ -201,8 +209,22 @@ public class ProxyCapMain {
         }
     }
 
-    // -------- 下面这段你原来就有，如无需可保留 --------
+    /**
+     * 异步运行命令（立刻返回，不等待）
+     * 用于需要“启动即返回”的场景，例如拉起 GUI/托盘进程
+     */
+    static void runCmdAsync(String cmdLine) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("cmd", "/c", cmdLine);
+            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+            pb.start(); // 不 wait，不读输出
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
+    // 你原本的工具方法，保持不动
     static String subText(String source, String startText, String endText, int offSet) {
         int start = source.indexOf(startText, offSet) + 1;
         if (start == 0) {
