@@ -9,7 +9,7 @@ echo 按任意键开始执行全部操作...
 pause >nul
 
 rem ===============================
-rem 检查管理员权限
+rem 请检查管理员权限
 rem ===============================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
