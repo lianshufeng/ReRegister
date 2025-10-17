@@ -9,19 +9,21 @@ echo 按任意键开始执行全部操作...
 pause >nul
 
 rem ===============================
-rem 请检查管理员权限
+rem 检查管理员权限
 rem ===============================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo 请以管理员身份运行此脚本！（右键 -> 以管理员身份运行）
+    echo [错误] 当前脚本未以管理员身份运行！
+    echo 请右键该脚本，选择“以管理员身份运行”后重试。
+    echo.
     pause
-    goto :EOF
+    exit /b 1
 )
 
 rem ===============================
 rem 变量定义
 rem ===============================
-set "URL=https://proxy.jpy.wang/www.proxycap.com/download/pcap542_x64.msi"
+set "URL=https://www.proxycap.com/download/pcap542_x64.msi"
 for %%A in (%URL:/= %) do set "FILENAME=%%A"
 set "TARGET_DIR=C:\ProxyCapReset"
 set "TARGET_FILE=%TARGET_DIR%\%FILENAME%"
@@ -42,26 +44,27 @@ if exist "%TARGET_FILE%" (
     echo 正在下载：%URL%
     curl -L -o "%TARGET_FILE%" "%URL%"
     if errorlevel 1 (
-        echo 下载失败，请检查网络连接。
-        pause
-        goto :EOF
+        echo [错误] 下载失败，请检查网络连接。
+        exit /b 1
     )
     echo 下载完成：%TARGET_FILE%
 )
 
 rem ===============================
-rem 备份注册表
+rem 备份注册表（排除 Registration 子项）
 rem ===============================
 echo.
 echo === 备份 ProxyCap 注册表值 ===
 if exist "%BACKUP_REG%" del /f /q "%BACKUP_REG%" >nul 2>&1
+
+rem 先删除 Registration 子项，避免被导出
+reg delete "HKLM\SOFTWARE\WOW6432Node\Proxy Labs\ProxyCap\Registration" /f >nul 2>&1
+
+rem 再导出主项（不包含 Registration）
 reg export "HKLM\SOFTWARE\WOW6432Node\Proxy Labs\ProxyCap" "%BACKUP_REG%" /y >nul 2>&1
 
 if exist "%BACKUP_REG%" (
     echo 注册表已备份到：%BACKUP_REG%
-    echo.
-    echo 删除 Registration 子项（不参与恢复）
-    reg delete "HKLM\SOFTWARE\WOW6432Node\Proxy Labs\ProxyCap\Registration" /f >nul 2>&1
 ) else (
     echo 未找到注册表项 ProxyCap，跳过备份。
 )
@@ -108,7 +111,7 @@ echo === 重新安装（静默） ===
 if exist "%TARGET_FILE%" (
     msiexec /i "%TARGET_FILE%" /quiet /norestart
     if errorlevel 1 (
-        echo 安装失败（错误码：%errorlevel%）。
+        echo [错误] 安装失败（错误码：%errorlevel%）。
     ) else (
         echo 安装完成。
     )
@@ -124,7 +127,7 @@ echo === 恢复 ProxyCap 注册表 ===
 if exist "%BACKUP_REG%" (
     reg import "%BACKUP_REG%" >nul 2>&1
     if errorlevel 1 (
-        echo 恢复失败，请检查注册表文件：%BACKUP_REG%
+        echo [错误] 恢复失败，请检查注册表文件：%BACKUP_REG%
     ) else (
         echo 注册表恢复完成。
     )
