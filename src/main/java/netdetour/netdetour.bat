@@ -1,12 +1,38 @@
 @echo off
 setlocal enabledelayedexpansion
 
+
 echo =============================================
 echo   NetDetour 安装/重置自动化工具
 echo =============================================
 echo.
-echo 按任意键开始执行全部操作...
+
+:: ===== 强提醒：配置丢失警告 =====
+echo ************************************************************
+echo *  警 告 ！                                              *
+echo *                                                        *
+echo *  本操作将【重置 NetDetour】并可能导致：                *
+echo *    - 所有已有配置丢失                                  *
+echo *    - 规则、节点、策略无法恢复                          *
+echo *                                                        *
+echo *  请务必在继续之前：                                    *
+echo *    1. 导出 / 备份 NetDetour 的配置文件                  *
+echo *    2. 确认已保存所有重要设置                            *
+echo *                                                        *
+echo *  继续执行即表示你已确认并承担后果！                    *
+echo ************************************************************
+echo.
+echo 按任意键继续，或直接关闭窗口以取消操作...
 pause >nul
+
+echo.
+set /p CONFIRM=请输入 Y 并回车以确认继续（其他任意键取消）：
+if /i not "%CONFIRM%"=="Y" (
+    echo.
+    echo 操作已取消，未进行任何修改。
+    pause
+    goto :EOF
+)
 
 rem ===============================
 rem 请检查管理员权限
@@ -69,12 +95,20 @@ rem ===============================
 echo.
 echo === 结束进程 ndtgui.exe ===
 taskkill /im %PROCESS_NAME% /f >nul 2>&1
-if %errorlevel% equ 0 (echo 已终止进程 %PROCESS_NAME%) else (echo 进程 %PROCESS_NAME% 未运行。)
+if %errorlevel% equ 0 (
+    echo 已终止进程 %PROCESS_NAME%
+) else (
+    echo 进程 %PROCESS_NAME% 未运行。
+)
 
 echo.
 echo === 停止服务 ndetourd ===
 net stop %SERVICE_NAME% >nul 2>&1
-if %errorlevel% equ 0 (echo 服务 %SERVICE_NAME% 已停止) else (echo 服务 %SERVICE_NAME% 不存在或已停止。)
+if %errorlevel% equ 0 (
+    echo 服务 %SERVICE_NAME% 已停止
+) else (
+    echo 服务 %SERVICE_NAME% 不存在或已停止。
+)
 
 rem ===============================
 rem 清理注册表
@@ -121,17 +155,13 @@ rem ===============================
 echo.
 echo === 写入注册表值 ===
 reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /f >nul
-reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v "NCK" /t REG_SZ /d "C:\\ProgramData\\NetDetour\\nck.dat" /f >nul
 if defined BACKUP_WFP (
-    rem 将原始十六进制值恢复
     reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v "UsingWfp" /t REG_DWORD /d !BACKUP_WFP! /f >nul
     echo 恢复 UsingWfp 值：!BACKUP_WFP!
 ) else (
     reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v "UsingWfp" /t REG_DWORD /d 0 /f >nul
     echo 写入默认 UsingWfp=0
 )
-reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v "UPD" /t REG_SZ /d "C:\\ProgramData\\NetDetour\\updates.dat" /f >nul
-reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v "Nps" /t REG_SZ /d "C:\\ProgramData\\NetDetour\\config.nps" /f >nul
 echo 注册表写入完成。
 
 rem ===============================
