@@ -23,7 +23,7 @@ if %errorlevel% neq 0 (
 rem ===============================
 rem 变量定义
 rem ===============================
-set "URL=https://www.proxycap.com/download/pcap542_x64.msi"
+set "URL=https://www.proxycap.com/download/pcap543_x64.msi"
 for %%A in (%URL:/= %) do set "FILENAME=%%A"
 set "TARGET_DIR=C:\ProxyCapReset"
 set "TARGET_FILE=%TARGET_DIR%\%FILENAME%"
