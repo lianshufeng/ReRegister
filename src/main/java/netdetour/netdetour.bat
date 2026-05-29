@@ -1,177 +1,256 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 
+title NetDetour 重装工具
 
-echo =============================================
-echo   NetDetour 安装/重置自动化工具
-echo =============================================
+echo.
+echo ============================================================
+echo                    NetDetour 重装工具
+echo ============================================================
 echo.
 
-:: ===== 强提醒：配置丢失警告 =====
+rem ============================================================
+rem 风险确认
+rem ============================================================
 echo ************************************************************
-echo *  警 告 ！                                              *
-echo *                                                        *
-echo *  本操作将【重置 NetDetour】并可能导致：                *
-echo *    - 所有已有配置丢失                                  *
-echo *    - 规则、节点、策略无法恢复                          *
-echo *                                                        *
-echo *  请务必在继续之前：                                    *
-echo *    1. 导出 / 备份 NetDetour 的配置文件                  *
-echo *    2. 确认已保存所有重要设置                            *
-echo *                                                        *
-echo *  继续执行即表示你已确认并承担后果！                    *
+echo *                       重 要 提 示                         *
 echo ************************************************************
 echo.
-echo 按任意键继续，或直接关闭窗口以取消操作...
-pause >nul
-
+echo 本工具将执行以下操作：
 echo.
-set /p CONFIRM=请输入 Y 并回车以确认继续（其他任意键取消）：
-if /i not "%CONFIRM%"=="Y" (
+echo   1. 关闭 NetDetour 相关进程
+echo   2. 停止 NetDetour 服务
+echo   3. 删除旧注册表配置
+echo   4. 卸载当前版本
+echo   5. 重新安装 NetDetour
+echo   6. 恢复 UsingWfp 配置项
+echo.
+echo 可能产生的影响：
+echo.
+echo   - NetDetour 现有配置可能丢失
+echo   - 规则、策略、节点等配置可能无法恢复
+echo.
+echo 请务必提前备份重要配置。
+echo.
+
+choice /c YN /m "我已完成备份，确认继续执行"
+
+if errorlevel 2 (
     echo.
-    echo 操作已取消，未进行任何修改。
+    echo 已取消操作。
     pause
     goto :EOF
 )
 
-rem ===============================
-rem 请检查管理员权限
-rem ===============================
+rem ============================================================
+rem 检查管理员权限
+rem ============================================================
+echo.
+echo [1/8] 检查管理员权限...
+
 net session >nul 2>&1
-if %errorlevel% neq 0 (
-    echo 请以管理员身份运行此脚本！（右键 -> 以管理员身份运行）
+
+if not "%errorlevel%"=="0" (
+    echo.
+    echo 错误：请以管理员身份运行本工具。
+    echo.
+    echo 操作步骤：
+    echo   1. 关闭当前窗口
+    echo   2. 右键点击本脚本
+    echo   3. 选择“以管理员身份运行”
+    echo.
     pause
     goto :EOF
 )
 
-rem ===============================
+echo 管理员权限检查通过。
+
+rem ============================================================
 rem 变量定义
-rem ===============================
-set "URL=https://www.netdetour.com/download/ndt112-64.msi"
+rem ============================================================
+set "URL=https://www.netdetour.com/download/ndt114-64.msi"
 for %%A in (%URL:/= %) do set "FILENAME=%%A"
-set "TARGET_DIR=C:\netdetour"
+
+set "TARGET_DIR=C:\NetDetour"
 set "TARGET_FILE=%TARGET_DIR%\%FILENAME%"
+
 set "SERVICE_NAME=ndetourd"
 set "PROCESS_NAME=ndtgui.exe"
+
 set "BACKUP_WFP="
 
+rem ============================================================
+rem 创建目录
+rem ============================================================
 echo.
-echo === 初始化目录 ===
-if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%" 2>nul
+echo [2/8] 初始化目录...
 
-rem ===============================
+if not exist "%TARGET_DIR%" (
+    mkdir "%TARGET_DIR%" >nul 2>&1
+)
+
+echo 工作目录：
+echo %TARGET_DIR%
+
+rem ============================================================
 rem 下载安装包
-rem ===============================
+rem ============================================================
+echo.
+echo [3/8] 检查安装包...
+
 if exist "%TARGET_FILE%" (
-    echo 安装包已存在：%TARGET_FILE%
+    echo 已存在安装包：
+    echo %TARGET_FILE%
 ) else (
-    echo 正在下载：%URL%
+    echo 正在下载安装包...
+    echo.
+    echo 下载地址：
+    echo %URL%
+    echo.
+
     curl -L -o "%TARGET_FILE%" "%URL%"
+
     if errorlevel 1 (
-        echo 下载失败，请检查网络连接。
+        echo.
+        echo 错误：安装包下载失败。
+        echo 请检查网络连接后重试。
         pause
         goto :EOF
     )
-    echo 下载完成：%TARGET_FILE%
+
+    echo.
+    echo 安装包下载完成。
 )
 
-rem ===============================
-rem 备份 UsingWfp 值到变量
-rem ===============================
+rem ============================================================
+rem 备份注册表
+rem ============================================================
 echo.
-echo === 备份 UsingWfp 注册表值 ===
-for /f "tokens=3" %%A in ('reg query "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v UsingWfp 2^>nul ^| find /i "UsingWfp"') do (
+echo [4/8] 备份配置...
+
+for /f "tokens=3" %%A in ('
+    reg query "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v UsingWfp 2^>nul ^| find /i "UsingWfp"
+') do (
     set "BACKUP_WFP=%%A"
 )
+
 if defined BACKUP_WFP (
     echo 已备份 UsingWfp 值：!BACKUP_WFP!
 ) else (
-    echo 未找到 UsingWfp，使用默认值 0。
+    echo 未发现 UsingWfp 配置。
+    echo 安装后将使用默认值 0。
 )
 
-rem ===============================
-rem 杀进程 & 停服务
-rem ===============================
+rem ============================================================
+rem 停止程序和服务
+rem ============================================================
 echo.
-echo === 结束进程 ndtgui.exe ===
-taskkill /im %PROCESS_NAME% /f >nul 2>&1
-if %errorlevel% equ 0 (
-    echo 已终止进程 %PROCESS_NAME%
+echo [5/8] 关闭程序和服务...
+
+taskkill /f /im %PROCESS_NAME% >nul 2>&1
+
+if "%errorlevel%"=="0" (
+    echo 已关闭进程：%PROCESS_NAME%
 ) else (
-    echo 进程 %PROCESS_NAME% 未运行。
+    echo 进程未运行：%PROCESS_NAME%
 )
 
-echo.
-echo === 停止服务 ndetourd ===
 net stop %SERVICE_NAME% >nul 2>&1
-if %errorlevel% equ 0 (
-    echo 服务 %SERVICE_NAME% 已停止
+
+if "%errorlevel%"=="0" (
+    echo 已停止服务：%SERVICE_NAME%
 ) else (
-    echo 服务 %SERVICE_NAME% 不存在或已停止。
+    echo 服务未运行或不存在：%SERVICE_NAME%
 )
 
-rem ===============================
+rem ============================================================
 rem 清理注册表
-rem ===============================
+rem ============================================================
 echo.
-echo === 清理旧注册表项 ===
+echo [6/8] 清理旧配置...
+
 reg delete "HKLM\SOFTWARE\WOW6432Node\NetDetour" /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\WOW6432Node\bscupcli.dll" /f >nul 2>&1
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\VSS\Diag\SPP" /f >nul 2>&1
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\MSTCP" /f >nul 2>&1
-echo 清理完成。
 
-rem ===============================
+echo 注册表清理完成。
+
+rem ============================================================
 rem 卸载旧版本
-rem ===============================
+rem ============================================================
 echo.
-echo === 卸载旧版本 ===
+echo [7/8] 卸载旧版本...
+
 if exist "%TARGET_FILE%" (
     msiexec /x "%TARGET_FILE%" /quiet /norestart
-    echo 卸载操作完成（忽略未安装情况）。
+
+    echo 卸载完成。
 ) else (
     echo 未找到安装包，跳过卸载。
 )
 
-rem ===============================
-rem 重新安装
-rem ===============================
+rem ============================================================
+rem 安装新版本
+rem ============================================================
 echo.
-echo === 重新安装（静默） ===
-if exist "%TARGET_FILE%" (
-    msiexec /i "%TARGET_FILE%" /quiet /norestart
-    if errorlevel 1 (
-        echo 安装失败（错误码：%errorlevel%）。
-    ) else (
-        echo 安装完成。
-    )
-) else (
-    echo 未找到安装包。
+echo [8/8] 安装新版本...
+
+msiexec /i "%TARGET_FILE%" /quiet /norestart
+
+if errorlevel 1 (
+    echo.
+    echo 安装失败。
+    echo 错误代码：%errorlevel%
+    pause
+    goto :EOF
 )
 
-rem ===============================
-rem 写入注册表
-rem ===============================
+echo 安装完成。
+
+rem ============================================================
+rem 恢复配置
+rem ============================================================
 echo.
-echo === 写入注册表值 ===
+echo 正在恢复配置...
+
 reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /f >nul
-if defined BACKUP_WFP (
-    reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v "UsingWfp" /t REG_DWORD /d !BACKUP_WFP! /f >nul
-    echo 恢复 UsingWfp 值：!BACKUP_WFP!
-) else (
-    reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" /v "UsingWfp" /t REG_DWORD /d 0 /f >nul
-    echo 写入默认 UsingWfp=0
-)
-echo 注册表写入完成。
 
-rem ===============================
-rem 结束提示
-rem ===============================
+if defined BACKUP_WFP (
+    reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" ^
+        /v "UsingWfp" ^
+        /t REG_DWORD ^
+        /d !BACKUP_WFP! ^
+        /f >nul
+
+    echo 已恢复 UsingWfp=!BACKUP_WFP!
+) else (
+    reg add "HKLM\SOFTWARE\WOW6432Node\NetDetour" ^
+        /v "UsingWfp" ^
+        /t REG_DWORD ^
+        /d 0 ^
+        /f >nul
+
+    echo 已写入默认值 UsingWfp=0
+)
+
 echo.
-echo =============================================
-echo 所有任务执行完成！
-echo 请重启计算机以使更改生效。
-echo =============================================
+echo ============================================================
+echo                       执 行 完 成
+echo ============================================================
 echo.
+echo NetDetour 已重新安装完成。
+echo.
+echo 建议操作：
+echo   1. 重启计算机
+echo   2. 启动 NetDetour
+echo   3. 导入备份配置
+echo   4. 检查代理规则是否正常
+echo.
+echo ============================================================
+echo.
+
 pause
 endlocal
+exit /b 0
