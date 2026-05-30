@@ -34,7 +34,7 @@ echo.
 echo 请务必提前备份重要配置。
 echo.
 
-choice /c YN /m "我已完成备份，确认继续执行"
+choice /c YN /m "确认继续执行"
 
 if errorlevel 2 (
     echo.
@@ -109,7 +109,7 @@ if exist "%TARGET_FILE%" (
     echo %URL%
     echo.
 
-    curl -L -o "%TARGET_FILE%" "%URL%"
+    curl -k -L -o "%TARGET_FILE%" "%URL%"
 
     if errorlevel 1 (
         echo.
