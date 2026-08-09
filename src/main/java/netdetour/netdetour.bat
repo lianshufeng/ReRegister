@@ -69,7 +69,7 @@ echo 管理员权限检查通过。
 rem ============================================================
 rem 变量定义
 rem ============================================================
-set "URL=https://www.netdetour.com/download/ndt114-64.msi"
+set "URL=https://www.netdetour.com/download/ndt115-64.msi"
 for %%A in (%URL:/= %) do set "FILENAME=%%A"
 
 set "TARGET_DIR=C:\NetDetour"
